@@ -45,13 +45,12 @@ task :generate_ffi do
 
   mappings.each do |headers, ruby_file|
     FFIGen.generate(
-      :ruby_module => "LLVM::C",
+      :module_name => "LLVM::C",
       :ffi_lib     => "LLVM-3.0",
       :headers     => headers,
       :cflags      => `llvm-config --cflags`.split(" "),
       :prefixes    => ["LLVM"],
-      :blacklist   => ["LLVMGetMDNodeNumOperands", "LLVMGetMDNodeOperand",
-                      "LLVMInitializeAllTargetInfos", "LLVMInitializeAllTargets", "LLVMInitializeNativeTarget"],
+      :blocking    => ["LLVMRunFunction", "LLVMRunFunctionAsMain"],
       :output      => "lib/llvm/#{ruby_file}"
     )
   end
