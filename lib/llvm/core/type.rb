@@ -102,12 +102,14 @@ module LLVM
     
     # Creates a struct type with the given array of element types.
     def self.struct(elt_types, is_packed, name = nil)
+      return from_ptr(C.struct_create_named(Context.global, name), :struct) if elt_types.nil?
+      
       elt_types.map! { |ty| LLVM::Type(ty) }
       elt_types_ptr = FFI::MemoryPointer.new(FFI.type_size(:pointer) * elt_types.size)
       elt_types_ptr.write_array_of_pointer(elt_types)
       if name
         struct = from_ptr(C.struct_create_named(Context.global, name), :struct)
-        C.struct_set_body(struct, elt_types_ptr, elt_types.size, is_packed ? 1 : 0) unless elt_types.empty?
+        C.struct_set_body(struct, elt_types_ptr, elt_types.size, is_packed ? 1 : 0)
         struct
       else
         from_ptr(C.struct_type(elt_types_ptr, elt_types.size, is_packed ? 1 : 0), :struct)
@@ -117,13 +119,6 @@ module LLVM
     # Creates a void type.
     def self.void
       from_ptr(C.void_type, :void)
-    end
-    
-    def self.rec
-      h = opaque
-      ty = yield h
-      h.refine(ty)
-      ty
     end
   end
 
@@ -162,6 +157,14 @@ module LLVM
       elt_types_ptr = FFI::MemoryPointer.new(FFI.type_size(:pointer) * elt_types.size)
       elt_types_ptr.write_array_of_pointer(elt_types)
       C.struct_set_body(self, elt_types_ptr, elt_types.size, 0)
+    end
+    
+    def packed?
+      C.is_packed_struct(self) != 0
+    end
+    
+    def opaque?
+      C.is_opaque_struct(self) != 0
     end
   end
 
