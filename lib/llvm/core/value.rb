@@ -648,6 +648,17 @@ module LLVM
       vals = LLVM::Support.allocate_pointers(size_or_values, &block)
       from_ptr C.const_struct(vals, vals.size / vals.type_size, packed ? 1 : 0)
     end
+    
+    # Same as ::const, but creates the struct with a pre-existing type.
+    # @param [LLVM::Type] type The type of the new struct
+    # @param [Integer or Array] size_or_values Either the number of elements in the struct 
+    #   or the elements themselves.
+    # @param [Proc] block A block returning the value for each element if a size is passed
+    # @return [LLVM::ConstantStruct] The resulting struct
+    def self.typed_const(type, size_or_values, &block)
+      vals = LLVM::Support.allocate_pointers(size_or_values, &block)
+      from_ptr(C.const_named_struct(type, vals, vals.size / vals.type_size))
+    end
   end
 
   class ConstantVector < Constant
