@@ -519,7 +519,7 @@ module LLVM
   bits = FFI.type_size(:int) * 8
   ::LLVM::Int = const_get("Int#{bits}")
 
-  # Creates a LLVM::Int (subclass of ConstantInt) at the NATIVE_INT_SIZE from a integer.
+  # Creates a LLVM::Int (subclass of ConstantInt) from a Ruby integer.
   # @param [Integer] val Ruby integer for the LLVM::Int to contain
   # @return [LLVM::Int] The resulting integer
   def LLVM.Int(val)
@@ -683,7 +683,7 @@ module LLVM
 
   class GlobalValue < Constant
     # Checks whether this global value is a declaration.
-    # @return [Integer] The resulting true/false value.
+    # @return [Boolean] The resulting true/false value.
     def declaration?
       case C.is_declaration(self)
       when 0 then false
