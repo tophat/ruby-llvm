@@ -530,7 +530,7 @@ module LLVM
   end
   
   # Boolean values
-  ::LLVM::TRUE = ::LLVM::Int1.from_i(-1)
+  ::LLVM::TRUE = ::LLVM::Int1.from_i(1)
   ::LLVM::FALSE = ::LLVM::Int1.from_i(0)
 
   class ConstantReal < Constant
@@ -663,8 +663,9 @@ module LLVM
 
   class ConstantVector < Constant
     # Creates a ConstantVector in which all bits are set to 1.
+    # @param [LLVM::Type] The type of vector to create
     # @return [LLVM::ConstantVector] The resulting vector
-    def self.all_ones
+    def self.all_ones(type)
       from_ptr(C.const_all_ones(type))
     end
 
@@ -682,9 +683,12 @@ module LLVM
 
   class GlobalValue < Constant
     # Checks whether this global value is a declaration.
-    # @return [Integer] A 0 or 1 int. 1 for true and 0 for false
+    # @return [Integer] The resulting true/false value.
     def declaration?
-      C.is_declaration(self)
+      case C.is_declaration(self)
+      when 0 then false
+      else true
+      end
     end
 
     # Gets the global value's linkage.
@@ -748,15 +752,18 @@ module LLVM
     end
 
     # Checks whether this global value is a global constant.
-    # @return [Integer] A 0 or 1 int. 1 for true and 0 for false
+    # @return [Boolean] The resulting true/false value.
     def global_constant?
-      C.is_global_constant(self)
+      case C.is_global_constant(self)
+      when 0 then false
+      else true
+      end
     end
 
     # Sets whether this global value is a global constant.
-    # @param [Integer] flag A 0 or 1 int. 1 for true and 0 for false
+    # @param [Boolean] flag A true/false value
     def global_constant=(flag)
-      C.set_global_constant(self, flag)
+      C.set_global_constant(self, flag ? 1 : 0)
     end
   end
 
