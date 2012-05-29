@@ -127,6 +127,11 @@ module LLVM
         yield builder
       end
     end
+    
+    # Deletes this basic block.
+    def dispose
+      C.delete_basic_block(self)
+    end
 
     # Gets the parent of this basic block.
     # @return [LLVM::Function] The parent function
@@ -148,6 +153,18 @@ module LLVM
       ptr = C.get_previous_basic_block(self)
       BasicBlock.from_ptr(ptr) unless ptr.null?
     end
+    
+    # Moves this basic block before block.
+    # @param [LLVM::BasicBlock] block The basic block that this block will be placed before.
+    def move_before(block)
+      C.move_basic_block_before(self, block)
+    end
+
+    # Moves this basic block after block.
+    # @param [LLVM::BasicBlock] block The basic block that this block will be placed after 
+    def move_after(block)
+      C.move_basic_block_after(self, block)
+    end
 
     def first_instruction  # deprecated
       instructions.first
@@ -155,6 +172,12 @@ module LLVM
 
     def last_instruction  # deprecated
       instructions.last
+    end
+    
+    # Checks if this basic block contains any instructions. 
+    # @return [Boolean] The resulting true/false value
+    def empty?
+      return instructions.first.nil?
     end
 
     # Gets an Enumerable of the instructions in the current block.
@@ -792,6 +815,14 @@ module LLVM
       # @return [LLVM::BasicBlock] The new block
       def append(name = "")
         BasicBlock.create(@fun, name)
+      end
+      
+      # Inserts a basic block before the given block and returns it.
+      # @param [String] block The block which the new block should be placed before
+      # @param [String] name The optional name of the block in LLVM IR
+      # @return [LLVM::BasicBlock] The new block
+      def insert(block, name="") 
+        BasicBlock.from_ptr(C.insert_basic_block(block_after, name))
       end
 
       # Gets the entry basic block in the collection. This is the block the function starts on.
