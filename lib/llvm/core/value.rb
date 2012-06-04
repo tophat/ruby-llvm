@@ -352,9 +352,10 @@ module LLVM
   end
 
   class ConstantInt < Constant
-    # Creates a ConstantInt in which all bits arre set to 1.
+    # Creates a ConstantInt in which all bits are set to 1.
+    # @param [LLVM::Type] The type of int to create
     # @return [LLVM::ConstantInt] The resulting int
-    def self.all_ones
+    def self.all_ones(type)
       from_ptr(C.const_all_ones(type))
     end
 

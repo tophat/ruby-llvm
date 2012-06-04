@@ -7,9 +7,9 @@ class VectorTestCase < Test::Unit::TestCase
   end
 
   def test_all_ones_vector
-    assert_raise(NotImplementedError) do
-      LLVM::ConstantVector.all_ones
-    end
+    vector = LLVM::ConstantVector.all_ones(LLVM::Vector(LLVM::Int32, 2))
+    assert_instance_of LLVM::ConstantVector, vector
+    assert_equal -2, run_vector_combiner(vector).to_i
   end
 
   def test_constant_vector_from_size
@@ -30,6 +30,15 @@ class VectorTestCase < Test::Unit::TestCase
 
   def test_vector_shuffle
     assert_equal 1 + 4, run_vector_shuffle(1, 2, 3, 4).to_i
+  end
+  
+  def run_vector_combiner(vector)
+    run_function([], [], LLVM::Int) do |builder, function, *arguments|
+      entry = function.basic_blocks.append
+      builder.position_at_end(entry)
+      builder.ret(builder.add(builder.extract_element(vector, LLVM::Int32.from_i(0)),
+                              builder.extract_element(vector, LLVM::Int32.from_i(1))))
+    end
   end
 
   def run_vector_elements(value1, value2)
